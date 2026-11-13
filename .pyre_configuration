@@ -1,0 +1,12 @@
+{
+  "source_directories": [
+    "src"
+  ],
+  "taint_models_path": [
+    "stubs/taint"
+  ],
+  "search_path": [
+    "stubs"
+  ],
+  "strict": false
+}

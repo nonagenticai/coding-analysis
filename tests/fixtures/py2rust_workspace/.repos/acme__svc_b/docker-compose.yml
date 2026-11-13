@@ -1,0 +1,6 @@
+services:
+  svc-b:
+    build: .
+    ports: ["8002:8002"]
+  postgres:
+    image: postgres:18

@@ -1,0 +1,217 @@
+{
+  "_about": "REAL ruff 0.17.3 runs, argv as recorded (the _run_ruff / _run_ruff_format argv), run from a temp dir holding only 'files'; stdout/stderr verbatim (temp dir rewritten to /repo).",
+  "check_diagnostics": {
+    "files": {
+      "sample.py": "import sys\nimport os\nx=1\ndef f():\n    unused = 2\n    return os.sep\n"
+    },
+    "argv": [
+      "check",
+      "--output-format",
+      "json",
+      "--extend-select",
+      "I,PL",
+      "."
+    ],
+    "exit_code": 1,
+    "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"I001\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/repo/sample.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"import os\\nimport sys\\n\\n\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 1\n          }\n        }\n      ],\n      \"message\": \"Organize imports\"\n    },\n    \"location\": {\n      \"column\": 1,\n      \"row\": 1\n    },\n    \"message\": \"Import block is un-sorted or un-formatted\",\n    \"name\": \"unsorted-imports\",\n    \"noqa_row\": 1,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unsorted-imports\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 11,\n      \"row\": 1\n    },\n    \"filename\": \"/repo/sample.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 2\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 1\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `sys`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 1\n    },\n    \"message\": \"`sys` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 1,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F841\",\n    \"end_location\": {\n      \"column\": 11,\n      \"row\": 5\n    },\n    \"filename\": \"/repo/sample.py\",\n    \"fix\": {\n      \"applicability\": \"unsafe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 6\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 5\n          }\n        }\n      ],\n      \"message\": \"Remove assignment to unused variable `unused`\"\n    },\n    \"location\": {\n      \"column\": 5,\n      \"row\": 5\n    },\n    \"message\": \"Local variable `unused` is assigned to but never used\",\n    \"name\": \"unused-variable\",\n    \"noqa_row\": 5,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-variable\"\n  }\n]",
+    "stderr": ""
+  },
+  "check_clean": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n"
+    },
+    "argv": [
+      "check",
+      "--output-format",
+      "json",
+      "--extend-select",
+      "I,PL",
+      "."
+    ],
+    "exit_code": 0,
+    "stdout": "[]",
+    "stderr": ""
+  },
+  "check_bad_config": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n",
+      "pyproject.toml": "[tool.ruff\n"
+    },
+    "argv": [
+      "check",
+      "--output-format",
+      "json",
+      "--extend-select",
+      "I,PL",
+      "."
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "ruff failed\n  Cause: Failed to parse /repo/pyproject.toml\n  Cause: TOML parse error at line 1, column 11\n  |\n1 | [tool.ruff\n  |           ^\nunclosed table, expected `]`\n\n"
+  },
+  "format_unformatted": {
+    "files": {
+      "sample.py": "import sys\nimport os\nx=1\ndef f():\n    unused = 2\n    return os.sep\n"
+    },
+    "argv": [
+      "format",
+      "--check",
+      "--output-format",
+      "json",
+      "."
+    ],
+    "exit_code": 1,
+    "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"unformatted\",\n    \"end_location\": {\n      \"column\": 4,\n      \"row\": 3\n    },\n    \"filename\": \"/repo/sample.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\\nx = 1\\n\\n\",\n          \"end_location\": {\n            \"column\": 4,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 3\n          }\n        }\n      ],\n      \"message\": null\n    },\n    \"location\": {\n      \"column\": 1,\n      \"row\": 3\n    },\n    \"message\": \"File would be reformatted\",\n    \"name\": \"unformatted\",\n    \"noqa_row\": null,\n    \"severity\": \"error\",\n    \"url\": null\n  }\n]",
+    "stderr": ""
+  },
+  "format_clean": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n"
+    },
+    "argv": [
+      "format",
+      "--check",
+      "--output-format",
+      "json",
+      "."
+    ],
+    "exit_code": 0,
+    "stdout": "[]",
+    "stderr": ""
+  },
+  "format_syntax_error": {
+    "files": {
+      "broken.py": "def f(x: int) -> int:\n    return x +\n"
+    },
+    "argv": [
+      "format",
+      "--check",
+      "--output-format",
+      "json",
+      "."
+    ],
+    "exit_code": 2,
+    "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"invalid-syntax\",\n    \"end_location\": {\n      \"column\": 1,\n      \"row\": 3\n    },\n    \"filename\": \"/repo/broken.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 15,\n      \"row\": 2\n    },\n    \"message\": \"Expected an expression\",\n    \"name\": \"invalid-syntax\",\n    \"noqa_row\": null,\n    \"severity\": \"error\",\n    \"url\": null\n  }\n]",
+    "stderr": ""
+  },
+  "concise_check_diagnostics": {
+    "files": {
+      "sample.py": "import sys\nimport os\nx=1\ndef f():\n    unused = 2\n    return os.sep\n",
+      "broken.py": "def f(x: int) -> int:\n    return x +\n"
+    },
+    "argv": [
+      "check",
+      "--output-format=concise",
+      "--extend-select",
+      "I,PL",
+      "."
+    ],
+    "exit_code": 1,
+    "stdout": "broken.py:2:15: invalid-syntax: Expected an expression\nsample.py:1:1: I001 [*] Import block is un-sorted or un-formatted\nsample.py:1:8: F401 [*] `sys` imported but unused\nsample.py:5:5: F841 Local variable `unused` is assigned to but never used\nFound 4 errors.\n[*] 2 fixable with `--fix` (1 unsafe fix available with `--fix --unsafe-fixes`).\n",
+    "stderr": ""
+  },
+  "concise_check_clean": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n"
+    },
+    "argv": [
+      "check",
+      "--output-format=concise",
+      "--extend-select",
+      "I,PL",
+      "."
+    ],
+    "exit_code": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  "concise_check_missing": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n"
+    },
+    "argv": [
+      "check",
+      "--output-format=concise",
+      "--extend-select",
+      "I,PL",
+      "nope.py"
+    ],
+    "exit_code": 1,
+    "stdout": "nope.py:1:1: E902 No such file or directory (os error 2)\nFound 1 error.\n",
+    "stderr": ""
+  },
+  "concise_check_bad_config": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n",
+      "pyproject.toml": "[tool.ruff\n"
+    },
+    "argv": [
+      "check",
+      "--output-format=concise",
+      "--extend-select",
+      "I,PL",
+      "."
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "ruff failed\n  Cause: Failed to parse /repo/pyproject.toml\n  Cause: TOML parse error at line 1, column 11\n  |\n1 | [tool.ruff\n  |           ^\nunclosed table, expected `]`\n\n"
+  },
+  "concise_format_unformatted": {
+    "files": {
+      "sample.py": "import sys\nimport os\nx=1\ndef f():\n    unused = 2\n    return os.sep\n",
+      "ok.py": "def f(x: int) -> int:\n    return x\n"
+    },
+    "argv": [
+      "format",
+      "--check",
+      "--output-format=concise",
+      "."
+    ],
+    "exit_code": 1,
+    "stdout": "sample.py:3:1: unformatted: File would be reformatted\n1 file would be reformatted, 1 file already formatted\n",
+    "stderr": ""
+  },
+  "concise_format_clean": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n"
+    },
+    "argv": [
+      "format",
+      "--check",
+      "--output-format=concise",
+      "."
+    ],
+    "exit_code": 0,
+    "stdout": "1 file already formatted\n",
+    "stderr": ""
+  },
+  "concise_format_syntax_error": {
+    "files": {
+      "broken.py": "def f(x: int) -> int:\n    return x +\n",
+      "sample.py": "import sys\nimport os\nx=1\ndef f():\n    unused = 2\n    return os.sep\n"
+    },
+    "argv": [
+      "format",
+      "--check",
+      "--output-format=concise",
+      "."
+    ],
+    "exit_code": 2,
+    "stdout": "broken.py:2:15: invalid-syntax: Expected an expression\nsample.py:3:1: unformatted: File would be reformatted\n1 file would be reformatted\n",
+    "stderr": ""
+  },
+  "concise_format_missing": {
+    "files": {
+      "ok.py": "def f(x: int) -> int:\n    return x\n"
+    },
+    "argv": [
+      "format",
+      "--check",
+      "--output-format=concise",
+      "nope.py"
+    ],
+    "exit_code": 2,
+    "stdout": "nope.py: io: /repo/nope.py: No such file or directory (os error 2)\n",
+    "stderr": ""
+  }
+}

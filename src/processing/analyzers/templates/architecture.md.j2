@@ -1,0 +1,46 @@
+# Architecture Overview
+
+## Project Structure
+{% if project_structure.directories %}
+### Directories
+{% for directory in project_structure.directories %}
+- {{ directory }}
+{% endfor %}
+{% endif %}
+
+## Languages Used
+{% for language in project_structure.languages %}
+- {{ language }}
+{% endfor %}
+
+## Size Metrics
+- **Total Files:** {{ project_structure.size_metrics.total_files }}
+- **Total Directories:** {{ project_structure.size_metrics.total_directories }}
+- **Total Size:** {{ project_structure.size_metrics.total_size_mb }} MB
+
+## File Types
+{% for ext, count in project_structure.file_types.items() %}
+- **{{ ext or 'No extension' }}:** {{ count }} files
+{% endfor %}
+
+## Call Graph Metrics
+{% if metrics %}
+- **Total Functions:** {{ metrics.total_functions }}
+- **Max Call Depth:** {{ metrics.max_call_depth }}
+- **Complexity Score:** {{ metrics.complexity_score }}
+{% endif %}
+
+## Critical Paths
+{% for path in critical_paths %}
+- {{ path }}
+{% endfor %}
+
+## Architecture Diagrams
+{% if diagrams %}
+Diagrams available:
+{% for diagram in diagrams %}
+- {{ diagram }}
+{% endfor %}
+{% else %}
+No architecture diagrams generated.
+{% endif %}

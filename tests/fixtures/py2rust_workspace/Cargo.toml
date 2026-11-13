@@ -1,0 +1,15 @@
+[package]
+name = "tgt-svc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+reqwest = "0.12"
+sqlx = { version = "0.8", features = ["postgres"] }
+serde = "1"
+
+[[bin]]
+name = "migrate"
+path = "src/bin/migrate.rs"

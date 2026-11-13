@@ -1,0 +1,37 @@
+# Change Summary
+
+## Overview
+**Current Branch:** {{ changes.current_branch }}
+**Analysis Period:** {{ changes.analysis_period }}
+
+{% if changes.change_statistics %}
+## Change Statistics
+- **Files Changed:** {{ changes.change_statistics.files_changed }}
+- **Lines Added:** {{ changes.change_statistics.insertions }}
+- **Lines Removed:** {{ changes.change_statistics.deletions }}
+{% endif %}
+
+## Recent Commits
+{% for commit in changes.recent_commits %}
+### {{ commit.hash }} - {{ commit.date }}
+**Author:** {{ commit.author }} ({{ commit.email }})
+**Message:** {{ commit.message }}
+
+{% endfor %}
+
+## Files Modified
+{% if changes.files_changed %}
+{% for file in changes.files_changed %}
+- `{{ file }}`
+{% endfor %}
+{% else %}
+No files modified in the analysis period.
+{% endif %}
+
+## Impact Analysis
+{{ changes.impact_analysis }}
+
+{% if changes.error %}
+## Analysis Errors
+{{ changes.error }}
+{% endif %}

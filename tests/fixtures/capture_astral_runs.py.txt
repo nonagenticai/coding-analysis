@@ -1,0 +1,75 @@
+"""Capture REAL ty 0.0.92 / ruff 0.17.3 runs into fixture JSON."""
+import json, subprocess, sys, tempfile
+from pathlib import Path
+
+OUT = Path(sys.argv[1])
+TY = ["uvx", "ty@0.0.92"]
+RUFF = ["uvx", "ruff@0.17.3"]
+SAMPLE = (
+    "import os\n"
+    "import nonexistent_mod\n"
+    "\n"
+    "\n"
+    "def f(x: int) -> str:\n"
+    "    return x\n"
+    "\n"
+    "\n"
+    "f(\"a\")\n"
+    "os.nope\n"
+    "if os.getpid():\n"
+    "    y = 1\n"
+    "print(y)\n"
+)
+CLEAN = "def f(x: int) -> int:\n    return x\n"
+RUFF_SAMPLE = "import sys\nimport os\nx=1\ndef f():\n    unused = 2\n    return os.sep\n"
+
+def run(argv, files):
+    with tempfile.TemporaryDirectory() as d:
+        for name, body in files.items():
+            (Path(d) / name).write_text(body)
+        p = subprocess.run(argv, cwd=d, capture_output=True, text=True)
+        out, err = p.stdout, p.stderr
+        # make absolute ruff filenames stable
+        out = out.replace(str(Path(d).resolve()) + "/", "/repo/").replace(d + "/", "/repo/")
+        err = err.replace(str(Path(d).resolve()), "/repo").replace(d, "/repo")
+        return {"files": files, "argv": argv[2:], "exit_code": p.returncode, "stdout": out, "stderr": err}
+
+ty_check = TY + ["check", "--output-format", "gitlab"]
+ty = {
+    "_about": "REAL ty 0.0.92 runs, argv = the _run_ty argv ('ty check --output-format gitlab <path>'), run from a temp dir holding only 'files'; stdout/stderr verbatim (temp dir rewritten to /repo).",
+    "diagnostics": run(ty_check + ["."], {"sample.py": SAMPLE}),
+    "clean": run(ty_check + ["."], {"ok.py": CLEAN}),
+    "syntax_error": run(ty_check + ["."], {"broken.py": "def f(x: int) -> int:\n    return x +\n"}),
+    "bad_config": run(ty_check + ["."], {"ok.py": CLEAN, "pyproject.toml": "[tool.ty\n"}),
+    "missing_path": run(ty_check + ["does_not_exist"], {"ok.py": CLEAN}),
+    "invalid_flag": run(ty_check + ["--no-such-flag", "."], {"ok.py": CLEAN}),
+}
+ruff_check = RUFF + ["check", "--output-format", "json", "--extend-select", "I,PL"]
+ruff_fmt = RUFF + ["format", "--check", "--output-format", "json"]
+# the container-exec argv (concise: JSON overflows the 1 MiB exec cap)
+ruff_check_c = RUFF + ["check", "--output-format=concise", "--extend-select", "I,PL"]
+ruff_fmt_c = RUFF + ["format", "--check", "--output-format=concise"]
+BROKEN = "def f(x: int) -> int:\n    return x +\n"
+ruff = {
+    "_about": "REAL ruff 0.17.3 runs, argv as recorded (the _run_ruff / _run_ruff_format argv), run from a temp dir holding only 'files'; stdout/stderr verbatim (temp dir rewritten to /repo).",
+    "check_diagnostics": run(ruff_check + ["."], {"sample.py": RUFF_SAMPLE}),
+    "check_clean": run(ruff_check + ["."], {"ok.py": CLEAN}),
+    "check_bad_config": run(ruff_check + ["."], {"ok.py": CLEAN, "pyproject.toml": "[tool.ruff\n"}),
+    "format_unformatted": run(ruff_fmt + ["."], {"sample.py": RUFF_SAMPLE}),
+    "format_clean": run(ruff_fmt + ["."], {"ok.py": CLEAN}),
+    "format_syntax_error": run(ruff_fmt + ["."], {"broken.py": "def f(x: int) -> int:\n    return x +\n"}),
+    "concise_check_diagnostics": run(ruff_check_c + ["."], {"sample.py": RUFF_SAMPLE, "broken.py": BROKEN}),
+    "concise_check_clean": run(ruff_check_c + ["."], {"ok.py": CLEAN}),
+    "concise_check_missing": run(ruff_check_c + ["nope.py"], {"ok.py": CLEAN}),
+    "concise_check_bad_config": run(ruff_check_c + ["."], {"ok.py": CLEAN, "pyproject.toml": "[tool.ruff\n"}),
+    "concise_format_unformatted": run(ruff_fmt_c + ["."], {"sample.py": RUFF_SAMPLE, "ok.py": CLEAN}),
+    "concise_format_clean": run(ruff_fmt_c + ["."], {"ok.py": CLEAN}),
+    "concise_format_syntax_error": run(ruff_fmt_c + ["."], {"broken.py": BROKEN, "sample.py": RUFF_SAMPLE}),
+    "concise_format_missing": run(ruff_fmt_c + ["nope.py"], {"ok.py": CLEAN}),
+}
+OUT.mkdir(parents=True, exist_ok=True)
+(OUT / "ty_runs.json").write_text(json.dumps(ty, indent=2) + "\n")
+(OUT / "ruff_runs.json").write_text(json.dumps(ruff, indent=2) + "\n")
+for k, v in {**ty, **ruff}.items():
+    if k != "_about":
+        print(k, v["exit_code"], len(v["stdout"]), v["stderr"][:80].replace("\n", " | "))

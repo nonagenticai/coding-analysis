@@ -1,0 +1,49 @@
+# User Guide
+
+## Introduction
+Welcome to the project! This guide will help you get started and understand how to use this software.
+
+{% if readme_content %}
+## Getting Started (from README)
+{{ readme_content[:1000] }}
+{% if readme_content|length > 1000 %}
+... (see README for full details)
+{% endif %}
+{% endif %}
+
+## Project Structure
+The project is organized as follows:
+
+### Languages
+{% for language in structure.languages %}
+- **{{ language }}**
+{% endfor %}
+
+### Key Directories
+{% for directory in structure.directories[:10] %}
+- `{{ directory }}`
+{% endfor %}
+{% if structure.directories|length > 10 %}
+... and {{ structure.directories|length - 10 }} more directories
+{% endif %}
+
+## Dependencies
+{% if dependencies.python %}
+### Python Dependencies
+{% for dep, info in dependencies.python.items() %}
+- **{{ dep }}** {{ info.version }}{% if info.dev %} (dev){% endif %}
+{% endfor %}
+{% endif %}
+
+{% if dependencies.javascript %}
+### JavaScript Dependencies
+{% for dep, info in dependencies.javascript.items() %}
+- **{{ dep }}** {{ info.version }}{% if info.dev %} (dev){% endif %}
+{% endfor %}
+{% endif %}
+
+## Installation
+Please refer to the project's README or setup documentation for installation instructions.
+
+## Usage
+For detailed usage instructions, please refer to the API reference and examples provided in the project documentation.

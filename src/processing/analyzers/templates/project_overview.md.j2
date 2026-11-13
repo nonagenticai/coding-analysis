@@ -1,0 +1,48 @@
+# Project Overview
+
+## Summary
+This document provides a high-level overview of the project structure, dependencies, and key documentation.
+
+## Project Statistics
+- **Total Files:** {{ structure.size_metrics.total_files }}
+- **Total Size:** {{ structure.size_metrics.total_size_mb }} MB
+- **Languages:** {{ structure.languages|join(', ') }}
+
+## File Distribution
+{% for ext, count in structure.file_types.items() %}
+- **{{ ext or 'No extension' }}:** {{ count }} files
+{% endfor %}
+
+## Dependencies Overview
+{% if dependencies.python %}
+### Python Dependencies
+- **Total:** {{ dependencies.python|length }} packages
+- **Production:** {{ dependencies.python.values()|rejectattr('dev')|list|length }}
+- **Development:** {{ dependencies.python.values()|selectattr('dev')|list|length }}
+{% endif %}
+
+{% if dependencies.javascript %}
+### JavaScript Dependencies
+- **Total:** {{ dependencies.javascript|length }} packages
+- **Production:** {{ dependencies.javascript.values()|rejectattr('dev')|list|length }}
+- **Development:** {{ dependencies.javascript.values()|selectattr('dev')|list|length }}
+{% endif %}
+
+## Key Documentation Files
+{% for filename, content in key_docs.items() %}
+### {{ filename }}
+{{ content }}
+{% if content|length >= 500 %}
+... (truncated)
+{% endif %}
+{% endfor %}
+
+## Directory Structure
+```
+{% for directory in structure.directories[:20] %}
+{{ directory }}/
+{% endfor %}
+{% if structure.directories|length > 20 %}
+... and {{ structure.directories|length - 20 }} more directories
+{% endif %}
+```

@@ -1,0 +1,62 @@
+name: CI
+
+# The public pipeline: nonagenticai/ci-workflows/python-service.yml on GitHub-hosted runners,
+# with no repository secrets, publishing ghcr.io/nonagenticai/coding-analysis from main.
+#
+# There is no deploy job. Flux watches the ImagePolicy for this service and rolls it when the
+# image changes — the repo never holds cluster credentials.
+#
+# While this repository was private it ran the private deployment archetype; that job is gone
+# rather than gated because GitHub parses a called workflow even when the calling job's `if:`
+# is false, so a public repository that keeps a private `uses:` cannot dispatch CI at all.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: nonagenticai/ci-workflows/.github/workflows/python-service.yml@main
+    permissions:
+      contents: read
+      packages: write
+    with:
+      image_name: coding-analysis
+      src_dir: src
+      # Real Rust toolchain (Ubuntu apt cargo + rustfmt + clippy) so the Rust quality tests
+      # (tests/unit/test_py2rust_rust_quality.py) run cargo on tests/fixtures/rust_quality
+      # instead of skipping.
+      extra_apt: cargo rustfmt rust-clippy
+      has_postgres: true
+      # The old 30-min cap cancelled builds mid-progress, and a cancelled check reports as
+      # *pending* rather than red — 50 is the measured headroom.
+      build_timeout_minutes: 50
+      # image_name has a dash; the CI DB is the underscored `coding_analysis_ci`.
+      database_name: coding_analysis_ci
+      # Extra Postgres-backed pass after the unit suite. -m integration on the command line
+      # overrides the pyproject `-m 'not integration'` addopts.
+      integration_test_select: tests/integration -m integration
+      # Bridge the provisioned DSN into the env var the integration tests gate on.
+      db_bootstrap_cmd: export TEST_DATABASE_URL=$DATABASE_URL
+      # Preserve the bespoke /health smoke against the freshly-pushed image.
+      build_smoke: |
+        docker run -d --name smoke-coding-analysis \
+          -e ENABLE_AUTH=false \
+          -e ENVIRONMENT=testing \
+          -e REDIS_URL=redis://localhost:6379/0 \
+          -p 18688:8688 "$IMAGE_REF"
+        ok=0
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:18688/health >/dev/null 2>&1; then
+            echo "health ok (attempt $i)"; ok=1; break
+          fi
+          sleep 1
+        done
+        docker logs smoke-coding-analysis || true
+        docker rm -f smoke-coding-analysis || true
+        [ "$ok" -eq 1 ]

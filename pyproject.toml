@@ -1,0 +1,171 @@
+[project]
+name = "coding-analysis"
+version = "1.0.0"
+license = { text = "Apache-2.0" }
+description = "Multi-language code analysis engine — complexity, architecture, semantic, static, quality, similarity, bug hunting, and contract validation for 9 languages via tree-sitter"
+authors = [{name = "Nonagentic", email = "dev@nonagentic.ai"}]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.35.0",
+    "gunicorn>=23.0.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "httpx>=0.28.0",
+    "redis>=7.1.0",
+    "structlog>=24.4.0",
+    "sqlalchemy[asyncio]>=2.0",
+    "psycopg[binary,pool]>=3.2.0",
+    "alembic>=1.13",
+    # >=1.12.0: adds auth.websocket.resolve_websocket_identity. AuthMiddleware is a
+    # BaseHTTPMiddleware and Starlette never invokes it on a `websocket` scope, so no
+    # middleware and no config flip can protect the /api/quality/ws/{container} route
+    # — the handler must resolve identity itself. (>=1.10.1: AuthMiddleware introspects
+    # the licence Bearer — required, this service consumes it instead of forking it.)
+    # >=1.15.0: closes the uncredentialed WS handshake. Through 1.14.0
+    # `WebSocketIdentity.should_close` was True only for Outcome.REFUSED, so a
+    # handshake with NO Authorization at all fell through and /api/quality/ws/
+    # {container} answered `connection_established` on a forged X-Tenant-Id
+    # (reproduced from inside the pod). 1.15.0 makes should_close True for
+    # NO_CREDENTIAL too. Do NOT lower this floor: at <=1.14.0 the fallback branch
+    # in quality_websocket is reachable again and the hole reopens.
+    # 1.19.0 adds CodingWorkspacesClient (the typed workspace API that
+    # src/clients/coding_containers.py now delegates to). Below this floor the
+    # adapter cannot import.
+    "coding-client>=1.19.5",
+    # tree-sitter + every grammar the hunt agent loads are EXACTLY the workspace
+    # image's versions (coding-containers vendor/hunt-agent/PIN.json): a bug
+    # hunt is refused (tree_sitter_version_mismatch) unless all of them match.
+    # Bump them only together with PIN.json and the runtime image.
+    "tree-sitter==0.25.2",
+    "tree-sitter-python==0.25.0",
+    "tree-sitter-javascript==0.25.0",
+    "tree-sitter-typescript==0.23.2",
+    "tree-sitter-go==0.25.0",
+    "tree-sitter-java==0.23.5",
+    "tree-sitter-rust==0.24.2",
+    "tree-sitter-c>=0.23.0",
+    "tree-sitter-cpp==0.23.4",
+    "tree-sitter-c-sharp==0.23.5",
+    "networkx>=3.5",
+    "scikit-learn>=1.5.2",
+    "numpy>=2.1.0",
+    # Data & IO
+    "aiosqlite>=0.20.0",
+    "aiofiles>=24.1.0",
+    # Security floors (pip-audit, freshly-published 2026 CVEs — pre-existing on
+    # main, surfaced here because the advisory DB updated): aiohttp
+    # CVE-2026-59881/69243/69244 (fix 3.14.3), cryptography CVE-2026-69247
+    # (transitive, fix 50.0.0).
+    "aiohttp>=3.14.4",
+    "cryptography>=50.0.0",
+    "pyyaml>=6.0",
+    "cachetools>=5.3.0",
+    "jinja2>=3.1.0",
+    "docker>=7.0.0",
+    "matplotlib>=3.8.0",
+    "PyJWT[crypto]>=2.14.0",
+    "tenacity>=8.2.0",
+    "pyastgrep>=0.12",
+    "astor>=0.8.0",
+    "astpretty>=3.0.0",
+    "toml>=0.10.0",
+    # OpenTelemetry
+    "opentelemetry-api>=1.24.0",
+    "opentelemetry-sdk>=1.24.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.24.0",
+    "opentelemetry-instrumentation-fastapi>=0.53b1",
+    "lxml>=6.1.0",
+    # Hardened XML parsing for scanned-repo manifests (pom.xml)
+    "defusedxml>=0.7.1",
+    # Security floor: pin urllib3 ≥ 2.7.0 for CVE-2026-44431 + CVE-2026-44432
+    # (transitive via requests/httpx; pinned directly to lift the lockfile floor).
+    "urllib3>=2.7.0",
+    # Security floor: pin pyasn1 ≥ 0.6.4 for PYSEC-2026-3455/3456/3457.
+    # Transitive (pyasn1-modules ← google-auth); floored here because the
+    # archetype's pip-audit gate is repo-scoped.
+    "pyasn1>=0.6.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "ruff==0.15.14",
+    "ty==0.0.39",
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "pytest-timeout>=2.3.1",
+    "ruff==0.15.14",
+    "detect-secrets",
+    "pip-audit>=2.10.0",
+    "ty==0.0.39",
+    # PYSEC-2026-3721: pip 26.1.2 is vulnerable (transitive via pip-audit -> pip-api -> pip); explicit floor so a re-lock cannot regress
+    "pip>=26.2",
+]
+
+[tool.uv.sources]
+coding-client = { git = "https://github.com/nonagenticai/coding-client", rev = "f7f25b4e81fe4390586108a7a731608dacf462fd" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+exclude = [".vulture_whitelist.py", "tests/fixtures/py2rust_workspace"]
+# pre-commit passes file names explicitly; honour `exclude` for them too.
+force-exclude = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501", "E402", "N815"]
+
+[tool.ty]
+
+[tool.ty.src]
+include = ["src"]
+exclude = ["**/.vulture_whitelist.py"]
+
+[tool.ty.environment]
+python-version = "3.14"
+
+[tool.ty.rules]
+unresolved-import = "ignore"
+unresolved-attribute = "ignore"
+unsupported-base = "ignore"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+testpaths = ["tests"]
+timeout = 300
+timeout_method = "thread"
+addopts = "-v --cov=src --cov-report=term-missing -m 'not integration'"
+filterwarnings = [
+    "ignore:GitWildMatchPattern:DeprecationWarning",
+    "ignore::pytest.PytestCollectionWarning",
+    "ignore:coroutine.*was never awaited:RuntimeWarning",
+    "ignore:The default datetime adapter is deprecated:DeprecationWarning",
+]
+markers = [
+    "integration: marks tests as integration tests",
+    "e2e: marks tests as end-to-end tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+concurrency = ["greenlet", "thread"]
+
+[tool.coverage.report]
+fail_under = 85

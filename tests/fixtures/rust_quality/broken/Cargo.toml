@@ -1,0 +1,10 @@
+[package]
+name = "fixture_broken"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+publish = false
+
+# Planted: a path dependency that does not exist, so cargo cannot build anything.
+[dependencies]
+missing = { path = "../does_not_exist" }
