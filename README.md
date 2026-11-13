@@ -1,5 +1,9 @@
 # coding-analysis
 
+[![CI](https://github.com/nonagenticai/coding-analysis/actions/workflows/ci.yml/badge.svg)](https://github.com/nonagenticai/coding-analysis/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/nonagenticai/coding-analysis)](https://github.com/nonagenticai/coding-analysis/releases)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 Multi-language code analysis engine for the Code Graph Helper platform. Performs static analysis, complexity metrics, architecture extraction, semantic cross-language relationship detection, quality scanning with language-specific tools, similarity/clone detection, bug hunting with auto-fix generation, and API contract validation -- all operating on codebases inside provisioned Docker containers.
 
 ## What It Does
@@ -21,7 +25,7 @@ Istio-forwarded headers with trusted-network bypass. No Keycloak dependency at t
 
 **Tenant middleware** (`src/auth/tenant.py`):
 - Extracts `X-Tenant-Id` header (set by Istio after license validation)
-- Fallback: license token introspection via `POST http://licenses.licenses.svc.cluster.local:8544/license/introspect`
+- Fallback: license token introspection via `POST http://licenses:8544/license/introspect`
 - Fallback: user state from auth middleware
 - Fallback: trusted network bypass with `DEFAULT_TENANT_ID`
 
@@ -198,7 +202,7 @@ Environment variables (all optional, with defaults):
 - **PostgreSQL** (`postgres:5432`) -- stores code graph data, quality results, project metadata (via `coding-client` connection pool).
 - **PgBouncer** (`pgbouncer:6432`) -- connection pooler for PostgreSQL.
 - **Redis** -- caching analysis results, tracking async analysis status, storing temporary state.
-- **licenses** (`licenses.licenses.svc.cluster.local:8544`) -- license token introspection for tenant resolution fallback.
+- **licenses** (`licenses:8544`) -- license token introspection for tenant resolution fallback.
 - **coding-client** (Python package) -- shared library providing database connection pooling, auth middleware, and common utilities.
 - **coding-gateway** (port 8687) -- API gateway that routes external requests to this service.
 
@@ -275,3 +279,19 @@ Requires Python 3.14+. Dev tools: **ruff** (lint + format), **ty** (type checkin
 GitHub Actions workflow: `ruff + ty → build amd64 → smoke test → push`
 
 Image pushed to `192.168.1.114:5000/coding-analysis:sha-<commit>`, promoted to `:latest` on success. Flux auto-deploys to K3s.
+
+## Security
+
+Report vulnerabilities privately through the repository's Security tab — see
+[`SECURITY.md`](SECURITY.md). Do not open a public issue for a security problem.
+
+## Contributing
+
+Issues and pull requests are welcome. See
+[`CONTRIBUTING.md`](https://github.com/nonagenticai/.github/blob/main/CONTRIBUTING.md) for the
+organisation-wide rules; setup, test and lint commands are in this README. Commits carry DCO
+sign-off.
+
+## License
+
+Apache-2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
