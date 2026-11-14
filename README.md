@@ -10,7 +10,7 @@ Multi-language code analysis engine for the Code Graph Helper platform. Performs
 
 The Code Graph Helper system provisions Docker containers that hold cloned repositories. This service is the analysis engine that inspects code inside those containers. It answers questions like: What are the architectural components? Where are the complexity hotspots? Are there duplicated functions across languages? What security vulnerabilities exist? It produces structured data consumed by the frontend dashboard and by n8n automation workflows.
 
-Supports 9 languages via tree-sitter: Python, JavaScript, TypeScript, Java, Go, Rust, C, C++, C#.
+Supports 8 languages via tree-sitter: Python, JavaScript, TypeScript, Java, Go, Rust, C++, C#. C source files are handled by the same `cpp` language registration (it claims `.c` and `.h` as well as the C++ extensions); there is no separate C language.
 
 ## Authentication
 
@@ -20,7 +20,7 @@ Istio-forwarded headers with trusted-network bypass. No Keycloak dependency at t
 1. **Public paths** (no auth): `/`, `/health`, `/docs`, `/redoc`, `/openapi.json`, `/metrics`
 2. **Dev/test mode** (`ENVIRONMENT=development|testing`): Bearer token matching `DEV_API_KEY` or `TEST_API_KEY` env vars
 3. **Istio headers**: `X-User-Id`, `X-Tenant-Id`, `X-User-Roles`, `X-User-Name`, `X-User-Email`, `X-Organization-Id`
-4. **Trusted network bypass**: RFC1918 + loopback IPs get default tenant context (`DEFAULT_TENANT_ID`)
+4. **Trusted network bypass**: RFC1918 + loopback IPs get the tenant configured in `DEFAULT_TENANT_ID` (unset = the bypass grants nothing)
 5. **Untrusted network without headers**: 401
 
 **Tenant middleware** (`src/auth/tenant.py`):
@@ -48,7 +48,7 @@ All routes are prefixed with `/api`. Port 8688.
 | POST | `/batch` | Batch analysis of multiple files in a container |
 | GET | `/capabilities` | Supported analysis types, languages, features |
 | GET | `/status/{analysis_id}` | Track long-running analysis progress |
-| POST | `/multi-language` | Multi-language analysis across 9 languages |
+| POST | `/multi-language` | Multi-language analysis across 8 languages |
 
 ### Semantic Analysis -- `/api/analysis/semantic`
 
@@ -221,7 +221,7 @@ src/
     dependencies.py          FastAPI auth dependencies
   app/
     api/
-      endpoints/             FastAPI routers (12 router modules)
+      endpoints/             FastAPI routers (15 top-level endpoint modules, plus analysis/scanner/similarity/visualization subpackages)
         analysis.py          Unified analysis (delegates to analysis_modules/)
         semantic_analysis.py Cross-language semantic analysis
         static_analysis.py   Call graph, signatures, validation, docs
@@ -245,7 +245,7 @@ src/
     ast_analysis/            AST-based class/function/API surface analysis
     batch_processing/        Directory scanning, parallel execution
     contract_analysis/       Client-service contract scanning
-    languages/               Language-specific configs (Go, Java, Python, Rust, C++, C#, JS)
+    languages/               Language-specific configs (Go, Java, Python, Rust, C++, C#, JS, TS)
     parsers/                 Tree-sitter parser wrappers
     quality_analysis/        Tool definitions, trend analysis, fix formatting
     semantic_analysis/       Cross-language relationship detection
@@ -276,14 +276,13 @@ Requires Python 3.14+. Dev tools: **ruff** (lint + format), **ty** (type checkin
 
 ## CI/CD
 
-GitHub Actions workflow: `ruff + ty → build amd64 → smoke test → push`
+GitHub Actions workflow: `nonagenticai/ci-workflows/python-service.yml` — lint + type check, pytest against a Postgres 18 sidecar plus the `tests/integration -m integration` pass, Rust quality fixtures via cargo, multi-arch build, `/health` smoke test, push to GHCR. There is no deploy job: Flux watches the ImagePolicy and rolls the service when the image changes.
 
-Image pushed to `192.168.1.114:5000/coding-analysis:sha-<commit>`, promoted to `:latest` on success. Flux auto-deploys to K3s.
+Image pushed to `ghcr.io/nonagenticai/coding-analysis:sha-<commit>`, tagged `:latest` on a main build.
 
 ## Security
 
-Report vulnerabilities privately through the repository's Security tab — see
-[`SECURITY.md`](SECURITY.md). Do not open a public issue for a security problem.
+Report vulnerabilities privately through the repository's Security tab. Do not open a public issue for a security problem.
 
 ## Contributing
 
@@ -308,4 +307,4 @@ enforcement point). Neither is required to run this code.
 
 ## License
 
-Apache-2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
+Apache-2.0 — see [`LICENSE`](LICENSE).
