@@ -19,6 +19,8 @@ from __future__ import annotations
 import asyncio
 import os
 import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -56,8 +58,36 @@ DIRTY = {
 
 
 def _cargo() -> str | None:
+    """The cargo this host can actually run, or None.
+
+    Presence is not usability. On this estate ``~/.local/bin/cargo`` is a shim that
+    REFUSES inside any Cargo project (Rust builds and tests belong on m1), so a
+    ``Path.exists()`` probe says "present" on a host where every one of these tests
+    then fails on the shim's refusal — the class was un-runnable off m1 and CI yet
+    did not skip it. Probing inside a throwaway manifest is the only honest test:
+    it skips exactly where the shim applies.
+    """
     found = shutil.which("cargo") or str(Path.home() / ".cargo" / "bin" / "cargo")
-    return found if Path(found).exists() else None
+    if not Path(found).exists():
+        return None
+    with tempfile.TemporaryDirectory() as probe:
+        probe_path = Path(probe)
+        (probe_path / "Cargo.toml").write_text(
+            '[package]\nname = "cargo-probe"\nversion = "0.0.0"\nedition = "2021"\n'
+        )
+        (probe_path / "src").mkdir()
+        (probe_path / "src" / "lib.rs").write_text("")
+        try:
+            result = subprocess.run(
+                [found, "--version"],
+                cwd=probe_path,
+                capture_output=True,
+                timeout=30,
+                check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+    return found if result.returncode == 0 else None
 
 
 class _LocalExec:
