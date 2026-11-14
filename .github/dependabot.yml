@@ -1,5 +1,10 @@
 version: 2
 
+# Re-validated 2026-11-14: the pydantic-ai ceilings that made every proposed upgrade
+# unsatisfiable were lifted, and coding-client is consumed from git at an exact rev. GitHub
+# only recomputes a Dependabot update job on a dependabot.yml change or its weekly schedule,
+# so this touch is what puts a current result on the record.
+
 # Dependabot replaces the org's private Renovate preset: a public repository cannot inherit a
 # preset hosted in a private one.
 updates:
