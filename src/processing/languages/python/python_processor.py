@@ -36,9 +36,9 @@ try:
     LEGACY_COMPONENTS_AVAILABLE = True
 except ImportError:
     LEGACY_COMPONENTS_AVAILABLE = False
-    PythonParser = None  # type: ignore
-    PythonEntityExtractor = None  # type: ignore
-    PythonRelationExtractor = None  # type: ignore
+    PythonParser = None
+    PythonEntityExtractor = None
+    PythonRelationExtractor = None
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,12 @@ class PyLanguageProcessor(LanguageProcessor):
 
         # Try to use legacy components if available
         if LEGACY_COMPONENTS_AVAILABLE:
+            # The three names are None only on the ImportError path, which sets the flag
+            # False, so inside this branch they are the classes. A checker cannot follow
+            # that through the flag; state the invariant rather than widen the types.
+            assert PythonParser is not None
+            assert PythonEntityExtractor is not None
+            assert PythonRelationExtractor is not None
             try:
                 self.parser = PythonParser()
                 self.entity_extractor = PythonEntityExtractor()
@@ -124,7 +130,7 @@ class PyLanguageProcessor(LanguageProcessor):
         # Method 1: Try parse method
         if hasattr(self.parser, "parse"):
             try:
-                parse_result = self.parser.parse(content, str(file_path))  # type: ignore[call-non-callable]  # ty: ignore[call-non-callable]
+                parse_result = self.parser.parse(content, str(file_path))  # type: ignore[call-non-callable]  # ty: ignore[not-callable]
                 if isinstance(parse_result, dict) and parse_result.get("success"):
                     tree = parse_result.get("tree")
             except (SyntaxError, ValueError, TypeError, AttributeError) as e:

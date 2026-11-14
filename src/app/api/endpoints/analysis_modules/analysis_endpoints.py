@@ -312,7 +312,7 @@ async def analyze_code(
                 # Log the paths for debugging
                 logger.info("Analysis using shared workspace path: %s", container_path)
                 logger.info("Repository container path: %s", repo_container_path)
-                if fallback_path:
+                if fallback_path is not None:
                     logger.info("Fallback path available: %s", fallback_path)
 
                 # Validate that we have a usable container path

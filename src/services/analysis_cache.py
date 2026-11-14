@@ -11,7 +11,7 @@ import asyncio
 import hashlib
 import json
 import logging
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -23,10 +23,7 @@ import aiosqlite
 from models.core_models import CoreCodeEntity, EntityRelation
 
 if TYPE_CHECKING:
-    from processing.languages.base import ParseResult, ParserType
-else:
-    ParseResult = None
-    ParserType = None
+    from processing.languages.base import ParseResult
 logger = logging.getLogger(__name__)
 
 
@@ -265,11 +262,6 @@ class AnalysisCache:
         Returns:
             Cached ParseResult if available, None otherwise
         """
-        global ParseResult
-        if ParseResult is None:
-            from processing.languages.base import ParseResult as _ParseResult
-
-            ParseResult = _ParseResult
         if not self._initialized:
             await self.initialize()
         self.stats.metrics.total_requests += 1
@@ -303,11 +295,6 @@ class AnalysisCache:
             content: File content that was analyzed
             parse_result: Analysis result to cache
         """
-        global ParseResult
-        if ParseResult is None:
-            from processing.languages.base import ParseResult as _ParseResult
-
-            ParseResult = _ParseResult
         if not self._initialized:
             await self.initialize()
         if not parse_result.success:
@@ -480,7 +467,7 @@ class AnalysisCache:
             await conn.commit()
 
     @asynccontextmanager
-    async def _get_db_connection(self) -> AsyncIterator[aiosqlite.Connection]:
+    async def _get_db_connection(self) -> AsyncGenerator[aiosqlite.Connection]:
         """Get async database connection using aiosqlite."""
         conn = await aiosqlite.connect(str(self.db_path))
         conn.row_factory = aiosqlite.Row
@@ -566,22 +553,20 @@ class AnalysisCache:
 
     async def _cache_entry_to_parse_result(self, cache_entry: AnalysisCacheEntry) -> ParseResult:
         """Convert cache entry back to ParseResult."""
-        global ParseResult, ParserType
-        if ParseResult is None:
-            from processing.languages.base import ParseResult as _ParseResult
+        # Imported here, not at module scope: processing.languages.base pulls in the
+        # parsers, and this service is imported by them. The previous version wrote the
+        # classes into module GLOBALS on first use, which also made the type-checker see
+        # `ParseResult` as a variable rather than a type.
+        from processing.languages.base import ParseResult as _ParseResult
+        from processing.languages.base import ParserType as _ParserType
 
-            ParseResult = _ParseResult
-        if ParserType is None:
-            from processing.languages.base import ParserType as _ParserType
-
-            ParserType = _ParserType
         entities = [self._dict_to_entity(e) for e in cache_entry.results.entities]
         relationships = [self._dict_to_relation(r) for r in cache_entry.results.relationships]
         try:
-            parser_type = ParserType(cache_entry.parser_type)
+            parser_type = _ParserType(cache_entry.parser_type)
         except ValueError:
-            parser_type = ParserType.REGEX_FALLBACK
-        return ParseResult(
+            parser_type = _ParserType.REGEX_FALLBACK
+        return _ParseResult(
             success=True,
             file_path=cache_entry.file_path,
             language=cache_entry.language,

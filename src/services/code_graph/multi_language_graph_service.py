@@ -68,7 +68,7 @@ class MultiLanguageGraphService:
             )
         try:
             if hasattr(processor, "parse_file"):
-                parse_result = await processor.parse_file(file_path, content)  # type: ignore[call-non-callable]  # ty: ignore[call-non-callable]
+                parse_result = await processor.parse_file(file_path, content)  # type: ignore[call-non-callable]  # ty: ignore[not-callable]
             else:
                 logger.warning(f"Processor for {file_path} doesn't have parse_file method")
                 return CoreAnalysisResult(

@@ -16,7 +16,7 @@ PgBouncer transaction-mode safety:
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from psycopg import AsyncConnection
@@ -92,7 +92,7 @@ async def get_pool() -> AsyncConnectionPool:
 
 
 @asynccontextmanager
-async def get_raw_connection(timeout: float | None = None) -> AsyncIterator[AsyncConnection]:
+async def get_raw_connection(timeout: float | None = None) -> AsyncGenerator[AsyncConnection]:
     """Yield a raw psycopg connection from the pool for a single operation.
 
     ``timeout`` caps the wait for a free pooled connection (seconds); ``None``

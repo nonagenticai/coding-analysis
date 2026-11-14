@@ -94,7 +94,7 @@ from __future__ import annotations
 import importlib
 from collections.abc import Callable
 from pathlib import PurePath
-from typing import Any
+from typing import Any, cast
 
 from hunt_agent import hunt
 
@@ -158,7 +158,7 @@ def _tsx_parser() -> Any | None:
             from tree_sitter import Language, Parser
 
             module = importlib.import_module(_TSX_GRAMMAR[0])
-            _TSX_PARSER[TSX] = Parser(Language(getattr(module, _TSX_GRAMMAR[1])()))
+            _TSX_PARSER[TSX] = Parser(Language(cast(object, getattr(module, _TSX_GRAMMAR[1])())))
         except (ImportError, AttributeError, ValueError, TypeError):
             _TSX_PARSER[TSX] = None
     return _TSX_PARSER[TSX]

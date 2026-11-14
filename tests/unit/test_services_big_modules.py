@@ -1989,30 +1989,20 @@ class TestAnalysisCacheCacheEntryToParseResult:
         mock_parser_type_cls.side_effect = lambda v: v
         mock_parser_type_cls.REGEX_FALLBACK = "regex_fallback"
 
-        with (
-            patch.dict(
-                sys.modules,
-                {
-                    "processing.languages.base": MagicMock(
-                        ParseResult=mock_parse_result_cls,
-                        ParserType=mock_parser_type_cls,
-                    )
-                },
-            ),
+        # The method imports both names from processing.languages.base on every call (so
+        # the parser package is never imported at module scope), so patching the module is
+        # enough — there is no module-global cache to reset any more.
+        with patch.dict(
+            sys.modules,
+            {
+                "processing.languages.base": MagicMock(
+                    ParseResult=mock_parse_result_cls,
+                    ParserType=mock_parser_type_cls,
+                )
+            },
         ):
-            # Reset globals so they get re-imported
-            import services.analysis_cache as ac_mod
-
-            old_pr = ac_mod.ParseResult
-            old_pt = ac_mod.ParserType
-            ac_mod.ParseResult = None
-            ac_mod.ParserType = None
-            try:
-                await cache._cache_entry_to_parse_result(entry)
-                mock_parse_result_cls.assert_called_once()
-            finally:
-                ac_mod.ParseResult = old_pr
-                ac_mod.ParserType = old_pt
+            await cache._cache_entry_to_parse_result(entry)
+        mock_parse_result_cls.assert_called_once()
 
 
 class TestAnalysisCacheLoadIndex:

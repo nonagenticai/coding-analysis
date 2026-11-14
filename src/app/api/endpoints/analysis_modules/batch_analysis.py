@@ -328,11 +328,11 @@ async def analyze_single_file_batch(task_info: dict) -> dict:
 
         # Perform analysis with timeout
         if hasattr(processor, "parse_file_with_metrics"):
-            analysis_task = processor.parse_file_with_metrics(  # ty: ignore[call-non-callable]
+            analysis_task = processor.parse_file_with_metrics(  # ty: ignore[not-callable]
                 file_path, content, task_info.get("batch_id")
             )  # type: ignore[call-non-callable]
         elif hasattr(processor, "parse_file"):
-            analysis_task = processor.parse_file(file_path, content)  # type: ignore[call-non-callable]  # ty: ignore[call-non-callable]
+            analysis_task = processor.parse_file(file_path, content)  # type: ignore[call-non-callable]  # ty: ignore[not-callable]
         else:
             raise ValueError("Processor does not support required parsing methods")
 
