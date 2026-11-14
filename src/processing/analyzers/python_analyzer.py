@@ -270,25 +270,30 @@ class PythonCodeProcessor(BaseCodeProcessor):
                 logger.error("Unexpected error processing %s: %s", file_path, e)
 
         # Calculate directory-level metrics
+        # CoreComplexityMetrics is a frozen model: assigning to its attributes raises at
+        # runtime ("Instance is frozen"), so the old accumulate-in-place loop could never
+        # have worked. Accumulate in locals and construct the total once.
+        cyclomatic = cognitive = 0.0
+        function_count = class_count = lines_of_code = 0
+        for result in file_results:
+            if result.complexity_metrics:
+                complexity = result.complexity_metrics
+                cyclomatic += complexity.cyclomatic_complexity
+                cognitive += complexity.cognitive_complexity
+                function_count += complexity.function_count
+                class_count += complexity.class_count
+                lines_of_code += complexity.lines_of_code
         total_complexity = CoreComplexityMetrics(
-            cyclomatic_complexity=0,
-            cognitive_complexity=0,
+            cyclomatic_complexity=cyclomatic,
+            cognitive_complexity=cognitive,
             nested_depth=0,
-            function_count=0,
-            class_count=0,
-            lines_of_code=0,
+            function_count=function_count,
+            class_count=class_count,
+            lines_of_code=lines_of_code,
             comment_lines=0,
             blank_lines=0,
             docstring_coverage=0.0,
         )
-        for result in file_results:
-            if result.complexity_metrics:
-                complexity = result.complexity_metrics
-                total_complexity.cyclomatic_complexity += complexity.cyclomatic_complexity
-                total_complexity.cognitive_complexity += complexity.cognitive_complexity
-                total_complexity.function_count += complexity.function_count
-                total_complexity.class_count += complexity.class_count
-                total_complexity.lines_of_code += complexity.lines_of_code
 
         return CoreAnalysisResult(
             success=True,

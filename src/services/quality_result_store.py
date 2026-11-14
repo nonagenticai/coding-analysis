@@ -17,7 +17,7 @@ import asyncio
 import logging
 import re
 from collections import Counter
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import PurePosixPath
@@ -325,7 +325,7 @@ _JSON_COLUMNS = frozenset(
 
 
 @asynccontextmanager
-async def _bounded_transaction() -> AsyncIterator[AsyncConnection]:
+async def _bounded_transaction() -> AsyncGenerator[AsyncConnection]:
     """A pooled connection inside one transaction with a 5s statement timeout.
 
     The pool wait is capped at :data:`STORE_POOL_TIMEOUT_S`; the timeout GUC is

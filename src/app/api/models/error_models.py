@@ -241,7 +241,7 @@ class ValidationErrorResponse(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="VALIDATION_ERROR",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -293,7 +293,7 @@ class Error400Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="BAD_REQUEST",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -318,7 +318,7 @@ class Error401Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="UNAUTHORIZED",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -343,7 +343,7 @@ class Error403Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="FORBIDDEN",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -369,7 +369,7 @@ class Error404Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="NOT_FOUND",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -384,7 +384,7 @@ class Error405Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="METHOD_NOT_ALLOWED",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -410,7 +410,7 @@ class Error406Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="NOT_ACCEPTABLE",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -440,7 +440,7 @@ class Error408Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="REQUEST_TIMEOUT",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -455,7 +455,7 @@ class Error409Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="CONFLICT",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -500,7 +500,7 @@ class Error429Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="RATE_LIMIT_EXCEEDED",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -529,7 +529,7 @@ class Error500Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="INTERNAL_ERROR",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",
@@ -558,7 +558,7 @@ class Error503Response(StandardErrorResponse):
         pattern=SAFE_STRING_PATTERN,
         description="Human-readable error message",
     )
-    error_code: str = Field(
+    error_code: str | None = Field(
         default="SERVICE_UNAVAILABLE",
         pattern=SAFE_STRING_PATTERN,
         description="Machine-readable error code",

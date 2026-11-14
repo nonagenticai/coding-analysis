@@ -15,7 +15,7 @@ except ImportError:
     try:
         import tomli
     except ImportError:
-        tomli = None  # type: ignore
+        tomli = None
 
 
 class PoetryLoader(AbstractDepLoader):

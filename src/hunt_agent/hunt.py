@@ -62,7 +62,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Any
+from typing import Any, cast
 
 #: Bumped by hand on a contract change; ``agent_sha`` is the real identity.
 AGENT_VERSION = "1"
@@ -284,7 +284,7 @@ def get_parser(grammar: str) -> Any | None:
             from tree_sitter import Language, Parser
 
             module = importlib.import_module(module_name)
-            parser = Parser(Language(getattr(module, factory)()))
+            parser = Parser(Language(cast(object, getattr(module, factory)())))
         except (ImportError, AttributeError, ValueError, TypeError):
             parser = None
     _PARSERS[grammar] = parser

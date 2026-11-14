@@ -61,7 +61,7 @@ class ChartGenerator:
                     )
 
             # Sort by complexity for better visualization
-            complexity_data.sort(key=lambda x: x["complexity"], reverse=True)
+            complexity_data.sort(key=lambda x: float(x["complexity"] or 0), reverse=True)
 
             # Generate heatmap configuration
             heatmap_config = {

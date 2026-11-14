@@ -60,7 +60,7 @@ class FixGenerator:
         except Exception:
             logger.exception("Fix generation failed for %s", error.error_type)
             fixes = [_fix_generic(self, error)]
-        return fixes  # type: ignore[invalid-return-type]  # ty: ignore[invalid-return-type]
+        return fixes  # type: ignore[invalid-return-type]  # ty: ignore[invalid-explicit-return]
 
 
 # ---------------------------------------------------------------------------

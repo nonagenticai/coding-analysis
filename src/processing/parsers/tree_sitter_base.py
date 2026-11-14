@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from models.core_models import (
     CoreCodeEntity,
@@ -83,7 +83,7 @@ class BaseTreeSitterProcessor(LanguageProcessor, ABC):
             language_module = importlib.import_module(language_module_name)
 
             # Get the language from the module and create Language object
-            self.language = Language(language_module.language())
+            self.language = Language(cast(object, language_module.language()))
             self.parser = Parser(self.language)
 
         except ImportError as ie:

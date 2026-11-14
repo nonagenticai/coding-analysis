@@ -326,7 +326,7 @@ class EntityTypeMetricsResponse(BaseModel):
 
     # This is a dynamic dictionary keyed by entity ID
     # Using __root__ pattern for dynamic dict responses
-    __pydantic_extra__: dict[str, dict[str, float]] = Field(
+    __pydantic_extra__: dict[str, Any] | None = Field(
         default_factory=dict, description="Entity metrics keyed by entity ID"
     )
 
@@ -381,7 +381,7 @@ class MetricsComparisonResponse(BaseModel):
     )
 
     # Dynamic dict mapping entity types to their top entities
-    __pydantic_extra__: dict[str, list[TopEntityItem]] = Field(
+    __pydantic_extra__: dict[str, Any] | None = Field(
         default_factory=dict, description="Entity types mapped to their top entities"
     )
 

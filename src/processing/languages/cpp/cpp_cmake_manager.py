@@ -342,17 +342,17 @@ class CppCMakeManager:
 
         for cmake_file in cmake_files:
             cmake_data = self.parse_cmake_file(cmake_file)
-            if cmake_data:
-                projects.append(cmake_data)
+            # A TypedDict with required fields is always truthy, so the old guard was dead.
+            projects.append(cmake_data)
 
-                # Aggregate information
-                for target in cmake_data.get("targets", []):
-                    total_targets += 1
-                    target_type = target.get("type", "")
-                    if target_type == "executable":
-                        executables.append(target)
-                    elif target_type == "library":
-                        libraries.append(target)
+            # Aggregate information
+            for target in cmake_data.get("targets", []):
+                total_targets += 1
+                target_type = target.get("type", "")
+                if target_type == "executable":
+                    executables.append(target)
+                elif target_type == "library":
+                    libraries.append(target)
 
                 # Collect dependencies
                 for dep in cmake_data.get("dependencies", []):
