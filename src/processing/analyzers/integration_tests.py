@@ -50,7 +50,7 @@ from typing import Any
 try:
     import pytest
 except ModuleNotFoundError:  # pragma: no cover — production image has no pytest
-    pytest = None  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+    pytest = None  # type: ignore[assignment]
 
 from models.static_analysis_models import (
     ChangeType,

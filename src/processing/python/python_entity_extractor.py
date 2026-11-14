@@ -20,26 +20,26 @@ logger = logging.getLogger(__name__)
 class PythonEntityExtractor(BaseEntityExtractor):
     """Extractor for Python code entities using the ast module."""
 
-    async def extract_entities(  # type: ignore[invalid-method-override]  # ty: ignore[invalid-method-override]
-        self, ast_tree: ast_module.Module, file_path: str, module_name: str
+    async def extract_entities(  # type: ignore[invalid-method-override]
+        self, ast: ast_module.Module, file_path: str, module_name: str
     ) -> list[dict[str, Any]]:
         """Extract entities (classes, functions, methods) from Python code.
 
         Args:
-            ast_tree: The parsed AST tree
+            ast: The parsed AST tree
             file_path: Path to the source file
             module_name: Name of the module being processed
 
         Returns:
             List of entity dictionaries
         """
-        if not ast_tree:
+        if not ast:
             logger.warning("Empty AST tree for %s", file_path)
             return []
 
         try:
             entities: list[dict[str, Any]] = []
-            self._extract_entities_from_ast(ast_tree, file_path, entities)
+            self._extract_entities_from_ast(ast, file_path, entities)
             return entities
         except (AttributeError, TypeError, ValueError) as e:
             logger.error(
@@ -59,7 +59,7 @@ class PythonEntityExtractor(BaseEntityExtractor):
         """Extract entities from AST and add them to the entities list.
 
         Args:
-            ast_tree: The parsed AST tree
+            ast: The parsed AST tree
             file_path: Path to the source file
             entities: List to populate with extracted entities
         """
@@ -83,7 +83,11 @@ class PythonEntityExtractor(BaseEntityExtractor):
                 # Get line numbers
                 start_line = node.lineno
                 end_line = max(
-                    (n.lineno for n in ast.walk(node) if hasattr(n, "lineno")),
+                    (
+                        ln
+                        for n in ast.walk(node)
+                        if isinstance(ln := getattr(n, "lineno", None), int)
+                    ),
                     default=start_line,
                 )
 
@@ -154,7 +158,11 @@ class PythonEntityExtractor(BaseEntityExtractor):
                 # Get line numbers
                 start_line = node.lineno
                 end_line = max(
-                    (n.lineno for n in ast.walk(node) if hasattr(n, "lineno")),
+                    (
+                        ln
+                        for n in ast.walk(node)
+                        if isinstance(ln := getattr(n, "lineno", None), int)
+                    ),
                     default=start_line,
                 )
 

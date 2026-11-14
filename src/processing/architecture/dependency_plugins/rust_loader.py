@@ -23,7 +23,7 @@ except ImportError:
         TOMLLIB_AVAILABLE = True
     except ImportError:
         TOMLLIB_AVAILABLE = False
-        tomllib = None  # type: ignore
+        tomllib = None
 
 from models.architecture_models import ExternalPackage
 

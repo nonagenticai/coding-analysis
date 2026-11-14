@@ -69,7 +69,7 @@ import os
 import threading
 import time
 from collections import Counter
-from collections.abc import AsyncIterator, Callable, Iterable
+from collections.abc import AsyncGenerator, Callable, Iterable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any
@@ -242,7 +242,7 @@ _pending = 0  # admitted requests; mutated on the event loop only (under _LOCK a
 
 
 @asynccontextmanager
-async def admit(limits: Limits | None = None) -> AsyncIterator[None]:
+async def admit(limits: Limits | None = None) -> AsyncGenerator[None]:
     """Admit one extraction request, or fail ``busy`` at once (see the module doc)."""
     global _pending
     limits = limits or limits_from_settings()

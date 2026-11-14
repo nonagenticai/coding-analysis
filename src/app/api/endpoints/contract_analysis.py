@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -142,7 +142,7 @@ def _busy_http(exc: isolation.IsolationFailedError, limits: isolation.Limits) ->
 
 
 @asynccontextmanager
-async def _admitted(limits: isolation.Limits) -> AsyncIterator[None]:
+async def _admitted(limits: isolation.Limits) -> AsyncGenerator[None]:
     """Admission for one extraction request; any ``busy`` inside it becomes a 503."""
     try:
         async with isolation.admit(limits):

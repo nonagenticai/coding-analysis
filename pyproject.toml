@@ -141,8 +141,8 @@ exclude = ["**/.vulture_whitelist.py"]
 python-version = "3.14"
 
 [tool.ty.rules]
-unresolved-import = "ignore"
-unresolved-attribute = "ignore"
+import-not-found = "ignore"
+missing-attribute = "ignore"
 unsupported-base = "ignore"
 
 [tool.pytest.ini_options]

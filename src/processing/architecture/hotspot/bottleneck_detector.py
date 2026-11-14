@@ -119,7 +119,10 @@ class BottleneckDetector:
                 bottlenecks.append(bottleneck_info)
 
         # Sort by score descending
-        bottlenecks.sort(key=lambda x: x["score"], reverse=True)
+        bottlenecks.sort(
+            key=lambda x: float(x["score"]) if isinstance(x["score"], (int, float, str)) else 0.0,
+            reverse=True,
+        )
         logger.info(f"Identified {len(bottlenecks)} potential bottlenecks")
 
         return bottlenecks

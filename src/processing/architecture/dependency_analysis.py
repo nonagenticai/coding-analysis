@@ -383,6 +383,11 @@ class DependencyAnalyzer:
                 )
 
         # Sort by risk score (highest first)
-        high_risk_packages.sort(key=lambda x: x["risk_score"], reverse=True)
+        high_risk_packages.sort(
+            key=lambda x: (
+                float(x["risk_score"]) if isinstance(x["risk_score"], (int, float, str)) else 0.0
+            ),
+            reverse=True,
+        )
 
         return high_risk_packages[:20]  # Return top 20 high-risk packages

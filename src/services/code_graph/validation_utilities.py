@@ -501,7 +501,7 @@ class GraphUtils:
     """Utility functions for working with NetworkX graphs."""
 
     @staticmethod
-    def create_dependency_graph(modules: dict[str, str]) -> nx.DiGraph[str]:
+    def create_dependency_graph(modules: dict[str, str]) -> nx.DiGraph:
         """
         Create a dependency graph from module code.
 
@@ -511,7 +511,7 @@ class GraphUtils:
         Returns:
             NetworkX directed graph representing dependencies
         """
-        graph: nx.DiGraph[str] = nx.DiGraph()
+        graph: nx.DiGraph = nx.DiGraph()
 
         # Parse all modules and extract imports
         module_imports: dict[str, dict[str, list[str]]] = {}

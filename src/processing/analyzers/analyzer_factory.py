@@ -171,7 +171,7 @@ class AnalyzerFactory:
             try:
                 analyzer = self.get_analyzer(language)
                 if analyzer and hasattr(analyzer, "initialize"):
-                    await analyzer.initialize()  # type: ignore[call-non-callable]  # ty: ignore[call-non-callable]
+                    await analyzer.initialize()  # type: ignore[call-non-callable]  # ty: ignore[not-callable]
                     logger.debug("Initialized %s analyzer", language)
             except (AttributeError, ImportError, RuntimeError) as e:
                 logger.error("Error initializing %s analyzer: %s", language, e)
