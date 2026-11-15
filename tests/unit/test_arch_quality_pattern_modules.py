@@ -1494,6 +1494,14 @@ class TestCloudPatternHelpers:
         assert patterns[0].pattern_type == "ApiGateway"
         assert patterns[0].confidence == 0.85
 
+    def test_k8s_gateway_lookalike_api_version_no_match(self):
+        # The dots in networking.k8s.io are literal: a look-alike such as
+        # `networkingXk8sYio` must not be accepted as the API group.
+        g = nx.DiGraph()
+        g.add_node("lookalike", code="apiVersion: networkingXk8sYio\nroute path host")
+        patterns = self.helpers.detect_kubernetes_gateway_patterns(g)
+        assert len(patterns) == 0
+
     # -- analyze_structural_patterns ------------------------------------
 
     def test_structural_patterns_sidecar(self):

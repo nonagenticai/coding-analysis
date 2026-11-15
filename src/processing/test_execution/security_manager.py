@@ -609,15 +609,18 @@ class ExecutionSecurityManager:
         # Remove null bytes and control characters
         sanitized = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", "", value)
 
-        # Remove potential script tags and dangerous HTML
+        # Remove potential script tags and dangerous HTML. The end-tag half
+        # must accept everything the HTML tokenizer accepts before the final
+        # `>` — including trailing whitespace and junk such as
+        # `</script\t\n bar>` — or a malformed end tag leaves the payload in.
         sanitized = re.sub(
-            r"<\s*script[^>]*>.*?<\s*/\s*script\s*>",
+            r"<\s*script\b[^>]*>.*?<\s*/\s*script\b[^>]*>",
             "",
             sanitized,
             flags=re.IGNORECASE | re.DOTALL,
         )
         sanitized = re.sub(
-            r"<\s*iframe[^>]*>.*?<\s*/\s*iframe\s*>",
+            r"<\s*iframe\b[^>]*>.*?<\s*/\s*iframe\b[^>]*>",
             "",
             sanitized,
             flags=re.IGNORECASE | re.DOTALL,

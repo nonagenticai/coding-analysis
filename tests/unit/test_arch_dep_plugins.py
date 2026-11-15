@@ -569,6 +569,19 @@ class TestRustDependencyLoader:
             == "crates.io"
         )
 
+    def test_ecosystem_sparse_crates_index_host(self):
+        assert (
+            self.loader._determine_ecosystem_from_source("registry+https://index.crates.io/")
+            == "crates.io"
+        )
+
+    def test_ecosystem_lookalike_host_is_not_the_crates_io_index(self):
+        # A host whose name merely *contains* "crates.io" is not the index.
+        # The source below is a git dependency and must be classified as git.
+        assert (
+            self.loader._determine_ecosystem_from_source("git+https://evil-crates.io/repo") == "git"
+        )
+
     def test_ecosystem_git(self):
         assert (
             self.loader._determine_ecosystem_from_source("git+https://github.com/org/repo") == "git"
