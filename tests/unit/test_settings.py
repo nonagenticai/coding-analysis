@@ -28,12 +28,6 @@ class TestSettingsDefaults:
             LICENSE_INTROSPECT_URL="http://x:1",
             CODING_CONTAINERS_URL="http://x:1",
             QUALITY_ANALYSIS_SERVICE_URL="http://x:1",
-            PYTHON_TEST_SERVICE_URL="http://x:1",
-            JAVASCRIPT_TEST_SERVICE_URL="http://x:1",
-            JAVA_TEST_SERVICE_URL="http://x:1",
-            RUST_TEST_SERVICE_URL="http://x:1",
-            CSHARP_TEST_SERVICE_URL="http://x:1",
-            GO_TEST_SERVICE_URL="http://x:1",
         )
         assert s.ENVIRONMENT == "production"
 
@@ -121,12 +115,6 @@ class TestDocsEnabledProperty:
         "LICENSE_INTROSPECT_URL": "http://x:1",
         "CODING_CONTAINERS_URL": "http://x:1",
         "QUALITY_ANALYSIS_SERVICE_URL": "http://x:1",
-        "PYTHON_TEST_SERVICE_URL": "http://x:1",
-        "JAVASCRIPT_TEST_SERVICE_URL": "http://x:1",
-        "JAVA_TEST_SERVICE_URL": "http://x:1",
-        "RUST_TEST_SERVICE_URL": "http://x:1",
-        "CSHARP_TEST_SERVICE_URL": "http://x:1",
-        "GO_TEST_SERVICE_URL": "http://x:1",
     }
 
     def test_production_docs_disabled(self):
@@ -226,12 +214,6 @@ class TestProductionValidator:
         "LICENSE_INTROSPECT_URL",
         "CODING_CONTAINERS_URL",
         "QUALITY_ANALYSIS_SERVICE_URL",
-        "PYTHON_TEST_SERVICE_URL",
-        "JAVASCRIPT_TEST_SERVICE_URL",
-        "JAVA_TEST_SERVICE_URL",
-        "RUST_TEST_SERVICE_URL",
-        "CSHARP_TEST_SERVICE_URL",
-        "GO_TEST_SERVICE_URL",
     )
 
     def _all_set(self) -> dict[str, str]:
@@ -252,6 +234,26 @@ class TestProductionValidator:
         kwargs["LICENSE_INTROSPECT_URL"] = ""
         with pytest.raises(RuntimeError, match="LICENSE_INTROSPECT_URL"):
             Settings(ENVIRONMENT="production", **kwargs)
+
+    def test_retired_executor_urls_are_optional(self, monkeypatch):
+        """Production must start without the six retired executor URLs.
+
+        Their namespaces were deleted 2026-11-14; requiring the endpoints is
+        what crashlooped this service when the ConfigMap keys were removed.
+        """
+        retired = (
+            "PYTHON_TEST_SERVICE_URL",
+            "JAVASCRIPT_TEST_SERVICE_URL",
+            "JAVA_TEST_SERVICE_URL",
+            "RUST_TEST_SERVICE_URL",
+            "CSHARP_TEST_SERVICE_URL",
+            "GO_TEST_SERVICE_URL",
+        )
+        for name in retired:
+            monkeypatch.delenv(name, raising=False)
+        s = Settings(ENVIRONMENT="production", **self._all_set())
+        for name in retired:
+            assert getattr(s, name) == ""
 
     def test_test_env_skips_validation(self, monkeypatch):
         # No required fields set; ENVIRONMENT="test" means validator must skip.

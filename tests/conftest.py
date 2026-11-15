@@ -24,12 +24,6 @@ os.environ.setdefault("CODING_CONTAINERS_URL", "http://localhost:8691")
 # ENVIRONMENT="test" but individual modules still read these at construction.
 os.environ.setdefault("LICENSE_INTROSPECT_URL", "http://localhost:8544/license/introspect")
 os.environ.setdefault("QUALITY_ANALYSIS_SERVICE_URL", "http://localhost:8086/api/quality")
-os.environ.setdefault("PYTHON_TEST_SERVICE_URL", "http://localhost:8087")
-os.environ.setdefault("JAVASCRIPT_TEST_SERVICE_URL", "http://localhost:8085")
-os.environ.setdefault("JAVA_TEST_SERVICE_URL", "http://localhost:8088")
-os.environ.setdefault("RUST_TEST_SERVICE_URL", "http://localhost:8089")
-os.environ.setdefault("CSHARP_TEST_SERVICE_URL", "http://localhost:8090")
-os.environ.setdefault("GO_TEST_SERVICE_URL", "http://localhost:8091")
 
 # Pre-load modules that are commonly stubbed by test files.
 # Only import modules whose stubs are harmful and break other tests.

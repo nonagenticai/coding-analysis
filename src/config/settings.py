@@ -71,6 +71,11 @@ class Settings(BaseSettings):
     # the coding-analysis rollout to a gitops env change.
     CODING_SECURITY_URL: str = ""
     QUALITY_ANALYSIS_SERVICE_URL: str = ""
+    # Retired 2026-11-14: the per-language test-executor namespaces are gone.
+    # Nothing in this service reads these six; the fields stay declared so a
+    # ConfigMap that still injects them via envFrom remains valid, but they are
+    # deliberately OUT of _REQUIRED_IN_PRODUCTION — requiring a dead endpoint is
+    # what crashlooped this service when the keys were removed.
     PYTHON_TEST_SERVICE_URL: str = ""
     JAVASCRIPT_TEST_SERVICE_URL: str = ""
     JAVA_TEST_SERVICE_URL: str = ""
@@ -118,12 +123,6 @@ class Settings(BaseSettings):
         "LICENSE_INTROSPECT_URL",
         "CODING_CONTAINERS_URL",
         "QUALITY_ANALYSIS_SERVICE_URL",
-        "PYTHON_TEST_SERVICE_URL",
-        "JAVASCRIPT_TEST_SERVICE_URL",
-        "JAVA_TEST_SERVICE_URL",
-        "RUST_TEST_SERVICE_URL",
-        "CSHARP_TEST_SERVICE_URL",
-        "GO_TEST_SERVICE_URL",
     )
 
     @property
