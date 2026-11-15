@@ -1,5 +1,10 @@
 version: 2
 
+# Re-validated 2026-11-15: the umbrella pydantic-ai that reached this repo through the pinned
+# coding-client rev pulled the google and bedrock provider extras, and their tenacity/boto3
+# caps made the update job unsatisfiable. The rev now points at coding-client's slim-provider
+# release; this touch makes GitHub recompute and record the result.
+
 # Re-validated 2026-11-14: the pydantic-ai ceilings that made every proposed upgrade
 # unsatisfiable were lifted, and coding-client is consumed from git at an exact rev. GitHub
 # only recomputes a Dependabot update job on a dependabot.yml change or its weekly schedule,
