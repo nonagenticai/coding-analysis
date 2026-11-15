@@ -11,6 +11,7 @@ import logging
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 try:
     import tomllib  # Python 3.11+
@@ -300,12 +301,26 @@ class RustDependencyLoader(AbstractDepLoader):
         return "source" not in pkg_data
 
     def _determine_ecosystem_from_source(self, source: str) -> str:
-        """Determine the ecosystem based on the source field in Cargo.lock."""
-        if "crates.io" in source:
+        """Determine the ecosystem based on the source field in Cargo.lock.
+
+        A Cargo.lock source is ``<kind>+<url>``, e.g.
+        ``registry+https://github.com/rust-lang/crates.io-index`` or
+        ``git+https://github.com/org/repo``. Compare the parsed hostname (and,
+        for the crates.io git index, its exact path) rather than searching the
+        raw string for a substring: a look-alike host such as
+        ``evil-crates.io`` must never be mistaken for the crates.io index.
+        """
+        kind, _, location = source.partition("+")
+        parsed = urlsplit(location)
+        host = (parsed.hostname or "").lower()
+
+        if host in {"crates.io", "index.crates.io"} or (
+            host == "github.com" and parsed.path.startswith("/rust-lang/crates.io-index")
+        ):
             return "crates.io"
-        if "git+" in source:
+        if kind == "git":
             return "git"
-        if source.startswith("registry+"):
+        if kind == "registry":
             return "crates.io"  # Alternative registry, but still crates ecosystem
         return "unknown"
 
