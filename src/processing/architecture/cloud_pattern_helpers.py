@@ -160,7 +160,7 @@ class CloudPatternHelpers:
 
         # Check for Kubernetes-specific API Gateway patterns
         k8s_gateway_regex = self._recognizer.get_compiled_pattern(
-            r"(kind:\s*(ingress|gateway)|apiVersion:\s*networking.k8s.io|"
+            r"(kind:\s*(ingress|gateway)|apiVersion:\s*networking\.k8s\.io\b|"
             r"\b(ingress|gateway|api-gateway|kong|ambassador|traefik)\b)"
         )
 
